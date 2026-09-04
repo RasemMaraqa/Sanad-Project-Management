@@ -1,0 +1,16 @@
+import { Languages, LogOut, Moon, Sun, UserRound } from 'lucide-react'
+import { PageHeader } from '../components/PageHeader'
+import { Button } from '../components/ui/Button'
+import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+
+export function SettingsPage() {
+  const { user, logout } = useAuth()
+  const { language, setLanguage, t } = useLanguage()
+  const setTheme = (dark: boolean) => { document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light'); window.dispatchEvent(new Event('theme:changed')) }
+  return <><PageHeader eyebrow={t('Preferences')} title={t('Settings')} description={t('Manage your local display preference and session.')}/><div className="grid gap-5 lg:grid-cols-2">
+    <section className="surface p-5 sm:p-6"><div className="mb-5 flex items-center gap-3"><div className="rounded-xl bg-cobalt-50 p-2.5 text-cobalt-600 dark:bg-cobalt-950"><UserRound size={20}/></div><h2 className="font-bold text-slate-900 dark:text-white">{t('Account')}</h2></div><dl className="space-y-4"><div><dt className="text-sm text-slate-400">{t('Name')}</dt><dd className="font-semibold">{user?.username}</dd></div><div><dt className="text-sm text-slate-400">{t('Email')}</dt><dd className="font-semibold">{user?.email}</dd></div></dl><Button variant="secondary" className="mt-6" onClick={logout}><LogOut size={17}/>{t('Log out')}</Button></section>
+    <section className="surface p-5 sm:p-6"><h2 className="font-bold text-slate-900 dark:text-white">{t('Appearance')}</h2><p className="mt-1 text-sm text-slate-500">{t('Your choice is saved on this device.')}</p><div className="mt-5 grid grid-cols-2 gap-3"><button onClick={() => setTheme(false)} className="rounded-xl border border-slate-200 p-4 text-start hover:border-cobalt-400 dark:border-zinc-700"><Sun className="mb-3 text-amber-500"/><span className="font-semibold">{t('Light')}</span></button><button onClick={() => setTheme(true)} className="rounded-xl border border-slate-200 p-4 text-start hover:border-cobalt-400 dark:border-zinc-700"><Moon className="mb-3 text-cobalt-500"/><span className="font-semibold">{t('Dark')}</span></button></div></section>
+    <section className="surface p-5 sm:p-6 lg:col-span-2"><div className="mb-5 flex items-center gap-3"><div className="rounded-xl bg-sumac-50 p-2.5 text-sumac-600 dark:bg-rose-950"><Languages size={20}/></div><div><h2 className="font-bold text-slate-900 dark:text-white">{t('Language')}</h2><p className="text-sm text-slate-500">{t('Your choice is saved on this device.')}</p></div></div><div className="grid max-w-md grid-cols-2 gap-3"><button onClick={() => setLanguage('en')} className={`rounded-xl border p-4 text-start font-semibold transition ${language === 'en' ? 'border-cobalt-500 bg-cobalt-50 text-cobalt-700 dark:bg-cobalt-950' : 'border-slate-200 dark:border-zinc-700'}`}>English</button><button onClick={() => setLanguage('ar')} className={`rounded-xl border p-4 text-start font-semibold transition ${language === 'ar' ? 'border-cobalt-500 bg-cobalt-50 text-cobalt-700 dark:bg-cobalt-950' : 'border-slate-200 dark:border-zinc-700'}`}>العربية</button></div></section>
+  </div></>
+}

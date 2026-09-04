@@ -1,0 +1,11 @@
+.env
+.env.production
+backend/.env
+backend/venv/
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.py[cod]
+*.log
+*.tsbuildinfo
+.codex_build/

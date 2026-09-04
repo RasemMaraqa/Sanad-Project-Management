@@ -1,0 +1,215 @@
+from enum import Enum
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import Project, User, Workspace, WorkspaceMember
+
+
+def get_project_workspace(
+    project_id: int,
+    db: Session
+):
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if not project:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    workspace = (
+        db.query(Workspace)
+        .filter(
+            Workspace.id == project.workspace_id
+        )
+        .first()
+    )
+
+    if not workspace:
+        raise HTTPException(
+            status_code=404,
+            detail="Workspace not found"
+        )
+
+    return project, workspace
+
+
+def get_workspace_member(
+    workspace: Workspace,
+    user: User,
+    db: Session
+):
+    member = (
+        db.query(WorkspaceMember)
+        .filter(
+            WorkspaceMember.workspace_id == workspace.id,
+            WorkspaceMember.user_id == user.id
+        )
+        .first()
+    )
+
+    if not member:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not a member of this workspace"
+        )
+
+    return member
+
+
+def require_workspace_permission(
+    workspace: Workspace,
+    user: User,
+    permission: "Permission",
+    db: Session,
+) -> None:
+    """Authorize a user for an action within one workspace."""
+    member = get_workspace_member(workspace, user, db)
+    require_permission(member, permission)
+
+
+class Permission(str, Enum):
+    WORKSPACE_VIEW = "workspace:view"
+    WORKSPACE_UPDATE = "workspace:update"
+    WORKSPACE_DELETE = "workspace:delete"
+
+    MEMBER_VIEW = "member:view"
+    MEMBER_INVITE = "member:invite"
+    MEMBER_REMOVE = "member:remove"
+    MEMBER_UPDATE = "member:update"
+
+    PROJECT_VIEW = "project:view"
+    PROJECT_UPDATE = "project:update"
+    PROJECT_CREATE = "project:create"
+    PROJECT_DELETE = "project:delete"
+
+    TASK_VIEW = "task:view"
+    TASK_CREATE = "task:create"
+    TASK_UPDATE = "task:update"
+    TASK_DELETE = "task:delete"
+
+    ROLE_CREATE = "role:create"
+    ROLE_VIEW = "role:view"
+    ROLE_UPDATE = "role:update"
+    ROLE_DELETE = "role:delete"
+
+
+DEFAULT_ROLE_PERMISSIONS = {
+    "Owner": {
+        Permission.WORKSPACE_VIEW,
+        Permission.WORKSPACE_UPDATE,
+        Permission.WORKSPACE_DELETE,
+
+        Permission.MEMBER_VIEW,
+        Permission.MEMBER_INVITE,
+        Permission.MEMBER_REMOVE,
+        Permission.MEMBER_UPDATE,
+
+        Permission.PROJECT_VIEW,
+        Permission.PROJECT_CREATE,
+        Permission.PROJECT_UPDATE,
+        Permission.PROJECT_DELETE,
+
+        Permission.TASK_VIEW,
+        Permission.TASK_CREATE,
+        Permission.TASK_UPDATE,
+        Permission.TASK_DELETE,
+
+        Permission.ROLE_VIEW,
+        Permission.ROLE_CREATE,
+        Permission.ROLE_UPDATE,
+        Permission.ROLE_DELETE
+    },
+    "Admin": {
+        Permission.WORKSPACE_VIEW,
+        Permission.WORKSPACE_UPDATE,
+
+        Permission.MEMBER_VIEW,
+        Permission.MEMBER_INVITE,
+        Permission.MEMBER_REMOVE,
+        Permission.MEMBER_UPDATE,
+
+        Permission.PROJECT_VIEW,
+        Permission.PROJECT_CREATE,
+        Permission.PROJECT_UPDATE,
+        Permission.PROJECT_DELETE,
+
+        Permission.TASK_VIEW,
+        Permission.TASK_CREATE,
+        Permission.TASK_UPDATE,
+        Permission.TASK_DELETE,
+
+        Permission.ROLE_VIEW,
+        Permission.ROLE_CREATE,
+        Permission.ROLE_UPDATE,
+    },
+    "Member": {
+        Permission.WORKSPACE_VIEW,
+
+        Permission.MEMBER_VIEW,
+
+        Permission.PROJECT_VIEW,
+        Permission.PROJECT_CREATE,
+        Permission.PROJECT_UPDATE,
+
+        Permission.TASK_VIEW,
+        Permission.TASK_CREATE,
+        Permission.TASK_UPDATE,
+
+        Permission.ROLE_VIEW,
+    }
+}
+
+
+def has_permission(
+    member,
+    permission: Permission
+) -> bool:
+    if not member.role:
+        return False
+
+    return any(
+        role_permission.name == permission.value
+        for role_permission in member.role.permissions
+    )
+
+
+'''testing class'''
+
+'''
+class FakeMember:
+    role = "Member"
+
+
+member = FakeMember()
+
+print(
+    has_permission(
+        member,
+        Permission.TASK_VIEW
+    )
+)
+
+print(
+    has_permission(
+        member,
+        Permission.TASK_DELETE
+    )
+)
+'''
+
+
+def require_permission(
+    member,
+    permission: Permission
+):
+    if not has_permission(member, permission):
+        raise HTTPException(
+            status_code=403,
+            detail=f"you dont have the {permission.value} permissions"
+        )

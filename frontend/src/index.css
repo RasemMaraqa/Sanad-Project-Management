@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; font-family: 'Segoe UI', Inter, ui-sans-serif, system-ui, sans-serif; background: #f7f8f5; color: #142433; }
+.dark { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #f7f8f5; }
+.dark body { background: #111116; color: #f4f4f5; }
+html[lang='ar'] body { font-family: 'Segoe UI', Tahoma, Arial, ui-sans-serif, system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgba(139, 92, 246, .3); outline-offset: 2px; }
+::selection { background: #e6edd6; color: #34421f; }
+
+@layer components {
+  .surface { @apply rounded-2xl border border-cobalt-100/80 bg-white shadow-panel dark:border-zinc-800 dark:bg-zinc-900; }
+  .field { @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 placeholder:text-slate-400 transition focus:border-cobalt-500 focus:outline-none focus:ring-4 focus:ring-cobalt-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100; }
+  .label { @apply mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300; }
+}
