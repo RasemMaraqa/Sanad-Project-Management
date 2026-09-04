@@ -1,5 +1,9 @@
 # سَنَد — Sanad Project Management
 
+<p align="center">
+  <img src="frontend/public/sanad-logo.png" alt="Sanad Project Management logo" width="220" />
+</p>
+
 Sanad is a bilingual project-management application for teams. It keeps work organized in one simple order:
 
 ```text
