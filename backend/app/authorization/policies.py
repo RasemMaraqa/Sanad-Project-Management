@@ -132,7 +132,6 @@ DEFAULT_ROLE_PERMISSIONS = {
         Permission.MEMBER_VIEW,
         Permission.MEMBER_INVITE,
         Permission.MEMBER_REMOVE,
-        Permission.MEMBER_UPDATE,
 
         Permission.PROJECT_VIEW,
         Permission.PROJECT_CREATE,
